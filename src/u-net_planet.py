@@ -38,12 +38,21 @@ def get_chips(path_image, size = 100, pad_x = 0, pad_y = 0):
 	          break
 	return chipped
 
-def get_chips_padding(path_image, size = 100, lista_pad = [(0,0)]):
+def get_chips_padding(path_image, size = 100, lista_porc = [(0,0)], n_rotate =0):
 	lista_resultado = []
+    #get list of chips
+	for porc_x, porc_y in lista_porc:
+		pad_x = int(size * (porc_x / 100.0))
+		pad_y = int(size * (porc_y / 100.0))
+		lista_temp = get_chips(path_image, pad_x = pad_x, pad_y = pad_y, size = size)
+		lista_resultado = lista_resultado + lista_temp
 
-	for pad_x, pad_y in lista_pad:
-	    lista_temp = get_chips(path_image, pad_x = pad_x, pad_y = pad_y, size = size)
-	    lista_resultado = lista_resultado + lista_temp
+	       
+    #rotate chips
+	for i in range(n_rotate):
+        
+		lista_resultado = lista_resultado + [np.rot90(m,k = i + 1,axes=(1,2)) for m in lista_resultado]
+
 
 	return np.transpose(np.stack(lista_resultado), [0,2,3,1])
 
