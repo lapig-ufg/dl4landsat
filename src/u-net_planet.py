@@ -1,18 +1,14 @@
-import numpy as np 
 import os
-import tensorflow as tf
-from tensorflow.python.keras.models import Sequential, Model
-from tensorflow.python.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, BatchNormalization, Input, UpSampling2D, Cropping2D, ZeroPadding2D, Reshape, Convolution2D
-from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateScheduler
+
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Conv2D, MaxPooling2D, Input, UpSampling2D, Cropping2D, ZeroPadding2D
+from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.python.keras import optimizers
-from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.optimizers import SGD
 from tensorflow.python.keras.layers import concatenate
 from tensorflow.python.keras.callbacks import TensorBoard
 
 import rasterio
 import numpy as np
-from rasterio.rio import sample
 from rasterio import windows
 import math
 
@@ -32,12 +28,12 @@ def get_chips(path_image, size = 100, pad_x = 0, pad_y = 0):
 
 	for i in range(n_grid_height):
 	    for j in range(n_grid_width):
-	        row_start = i*n_grid_height + pad_y                 
-	        col_start = j*n_grid_width + pad_x 
+	        row_start = i*n_grid_height + pad_y
+	        col_start = j*n_grid_width + pad_x
 	        window = windows.Window(col_start, row_start, size, size)
-	        data = dataset.read(indexes, window=window, masked=False, boundless=True)            
+	        data = dataset.read(indexes, window=window, masked=False, boundless=True)
 	        chipped.append(data)
-	          
+
 	        if (row_start + size*2) > height or (col_start + size*2) > width:
 	          break
 	return chipped
@@ -45,7 +41,7 @@ def get_chips(path_image, size = 100, pad_x = 0, pad_y = 0):
 def get_chips_padding(path_image, size = 100, lista_pad = [(0,0)]):
 	lista_resultado = []
 
-	for pad_x, pad_y in lista_pad:  
+	for pad_x, pad_y in lista_pad:
 	    lista_temp = get_chips(path_image, pad_x = pad_x, pad_y = pad_y, size = size)
 	    lista_resultado = lista_resultado + lista_temp
 
@@ -62,8 +58,8 @@ path_image_label = 'SF-23-Y-C_jan18_ref_clipped.tif'
 padding_list = [(0,0), (0,30), (30, 0), (30,30)]
 #padding_list = [(0,0), (0,30)]
 
-x_train = get_chips_padding(path_image_data, chip_size, padding_list)  
-y_train = get_chips_padding(path_image_label, chip_size, padding_list)  
+x_train = get_chips_padding(path_image_data, chip_size, padding_list)
+y_train = get_chips_padding(path_image_label, chip_size, padding_list)
 
 nsamples, _, _, channels = x_train.shape
 img_size = chip_size
@@ -71,7 +67,7 @@ img_size = chip_size
 print(x_train.shape)
 print(y_train.shape)
 
-X_train, X_val, Y_train, Y_val = train_test_split(x_train, y_train, test_size=0.2)   
+X_train, X_val, Y_train, Y_val = train_test_split(x_train, y_train, test_size=0.2)
 
 print('Split train: ', len(X_train), len(Y_train))
 print('Split valid: ', len(X_val), len(Y_val))
@@ -94,7 +90,7 @@ def get_crop_shape(target, refer):
 			ch1, ch2 = int(ch/2), int(ch/2)
 
 	return (ch1, ch2), (cw1, cw2)
-		
+
 def get_unet(n_ch,patch_height,patch_width):
 	concat_axis = 3
 
@@ -166,7 +162,7 @@ for learn_rate, epochs in zip(learn_rates, epochs_arr):
 	if os.path.isfile(weights_path):
 			print("loading existing weight for training")
 			model.load_weights(weights_path)
-	
+
 	opt  = optimizers.Adam(lr=learn_rate)
 	model.compile(loss='binary_crossentropy', # We NEED binary here, since categorical_crossentropy l1 norms the output before calculating loss.
 								optimizer=opt,
