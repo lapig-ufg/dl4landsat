@@ -13,6 +13,7 @@ from rasterio import windows
 import math
 
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import fbeta_score
 
 tensorboard = TensorBoard(log_dir='logs',histogram_freq=10)
 
@@ -87,16 +88,16 @@ def get_crop_shape(target, refer):
 	cw = (target.get_shape()[2] - refer.get_shape()[2]).value
 	assert (cw >= 0)
 	if cw % 2 != 0:
-			cw1, cw2 = int(cw/2), int(cw/2) + 1
+		cw1, cw2 = int(cw/2), int(cw/2) + 1
 	else:
-			cw1, cw2 = int(cw/2), int(cw/2)
+		cw1, cw2 = int(cw/2), int(cw/2)
 	# height, the 2nd dimension
 	ch = (target.get_shape()[1] - refer.get_shape()[1]).value
 	assert (ch >= 0)
 	if ch % 2 != 0:
-			ch1, ch2 = int(ch/2), int(ch/2) + 1
+		ch1, ch2 = int(ch/2), int(ch/2) + 1
 	else:
-			ch1, ch2 = int(ch/2), int(ch/2)
+		ch1, ch2 = int(ch/2), int(ch/2)
 
 	return (ch1, ch2), (cw1, cw2)
 
@@ -169,18 +170,18 @@ tensorboard.on_train_begin()
 for learn_rate, epochs in zip(learn_rates, epochs_arr):
 	tensorboard.on_epoch_begin(epochs)
 	if os.path.isfile(weights_path):
-			print("loading existing weight for training")
-			model.load_weights(weights_path)
+		print("loading existing weight for training")
+		model.load_weights(weights_path)
 
 	opt  = optimizers.Adam(lr=learn_rate)
 	model.compile(loss='binary_crossentropy', # We NEED binary here, since categorical_crossentropy l1 norms the output before calculating loss.
 								optimizer=opt,
 								metrics=['accuracy'])
 	callbacks = [EarlyStopping(monitor='val_loss', patience=2, verbose=1),
-							 ModelCheckpoint(weights_path, monitor='val_loss', save_best_only=True, verbose=2)]
+							 ModelCheckpoint(weights_path, monitor='val_loss', save_best_only=True, verbose=2), tensorboard]
 
 	model.fit(x = X_train, y= Y_train, validation_data=(X_val, Y_val),
-		batch_size=batch_size, verbose=2, epochs=epochs, callbacks=[tensorboard], shuffle=True)
+		batch_size=batch_size, verbose=2, epochs=epochs, callbacks=callbacks, shuffle=True)
 	tensorboard.on_epoch_end(epochs)
 
 tensorboard.on_train_end()
@@ -189,6 +190,5 @@ if os.path.isfile(weights_path):
 		model.load_weights(weights_path)
 
 p_val = model.predict(X_val, batch_size = batch_size, verbose=1)
-print(fbeta_score(Y_val, np.array(p_val) > 0.2, beta=2, average='samples'))
-
 p_test = model.predict(x_test, batch_size = batch_size, verbose=1)
+print(fbeta_score(Y_val, np.array(p_val) > 0.2, beta=2, average='samples'))
