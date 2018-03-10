@@ -30,11 +30,8 @@ def do_evaluation(estimator, input_data, input_expected, category):
 	print("Saving images in " + output_dir + "...")
 	for predict, expect in zip(predict_output, input_expected):
 		
-		# This Hard coded logic to transform the output need a change fix
-		predict[predict <= 1.5] = 1
-		predict[np.logical_and(predict > 1.5, predict <= 2.5)] = 2
-		predict[np.logical_and(predict > 2.5, predict <= 3.5)] = 3
-		predict[predict > 3.5] = 4
+		predict[predict > 0.5] = 1
+		predict[predict <= 0.5] = 0
 
 		scipy.misc.imsave(output_dir+'/'+str(i)+'_predict.jpg', predict[:,:,0])
 		scipy.misc.imsave(output_dir+'/'+str(i)+'_expect.jpg', expect[:,:,0])
@@ -45,14 +42,14 @@ def do_evaluation(estimator, input_data, input_expected, category):
 		mean_acc.append( accuracy_score(exp_flat, pre_flat) )
 
 		# Works only for binary classifications
-		#mean_precision.append( precision_score(exp_flat, pre_flat) ) 
-		#mean_recall.append( recall_score(exp_flat, pre_flat) )
+		mean_precision.append( precision_score(exp_flat, pre_flat) ) 
+		mean_recall.append( recall_score(exp_flat, pre_flat) )
 
 		i = i + 1
 
 	print(category + ' accurancy:',np.mean(mean_acc))
-	#print(category + ' precision:',np.mean(mean_precision))
-	#print(category + ' recall:',np.mean(mean_recall))
+	print(category + ' precision:',np.mean(mean_precision))
+	print(category + ' recall:',np.mean(mean_recall))
 
 def predict(img_input_path, img_output_path, img_input_nodata):
 
@@ -60,7 +57,7 @@ def predict(img_input_path, img_output_path, img_input_nodata):
 	estimator = tf.estimator.Estimator(model_fn=md.description, model_dir=MODEL_DIR)
 
 	# Remove the reference map (labels) in last band
-	input_data = input_data[:,:,:,0:4]
+	input_data = input_data[:,:,:,0:8]
 
 	tensors_to_log = {}
 	data_size, _, _, _ =  input_data.shape
@@ -74,6 +71,10 @@ def predict(img_input_path, img_output_path, img_input_nodata):
 
 	predict_array = []
 	for predict, dummy in zip(predict_results, input_data):
+		
+		predict[predict > 0.5] = 1
+		predict[predict <= 0.5] = 0
+		
 		predict_array.append(predict.astype(np.uint8))
 	
 	image_utils.write_data(img_input_path, img_output_path, predict_array, input_windows)

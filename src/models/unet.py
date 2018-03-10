@@ -82,20 +82,27 @@ def description(features, labels, mode, params, config):
 	if mode == tf.estimator.ModeKeys.PREDICT:
 		return tf.estimator.EstimatorSpec(mode=mode, predictions=output)
 
-	loss = multiclass_cost(output, labels)
+	loss = twoclass_cost(output, labels)
 	
 	optimizer = tf.contrib.opt.NadamOptimizer(0.00005, name='optimizer')
 
 	with tf.name_scope("img_metrics"):
-		input_data_viz = ((input_data[:,:,:,0:3]) + 20)
+		input_data_viz = ((input_data[:,:,:,3:6]) + 11)
 		input_data_viz = tf.image.convert_image_dtype(input_data_viz, tf.uint8)
+		input_data_viz = input_data_viz
+		
+		difference = tf.subtract(labels, output)
 
-		output_viz = tf.image.grayscale_to_rgb(output)
-		labels_viz = tf.image.grayscale_to_rgb(labels)
+		output_viz = tf.image.convert_image_dtype(output, tf.uint8, name="img")
+		labels_viz = tf.image.convert_image_dtype(labels, tf.uint8)
+		difference_viz = tf.image.convert_image_dtype(difference, tf.uint8)
 	
 		tf.summary.image('img',  input_data_viz, max_outputs=2)
 		tf.summary.image('output', output_viz, max_outputs=2)
 		tf.summary.image('labels', labels_viz, max_outputs=2)
+		tf.summary.image('difference_viz', difference_viz, max_outputs=2)
+
+		tf.summary.histogram('difference', difference)
 
 	update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
 	with tf.control_dependencies(update_ops):
