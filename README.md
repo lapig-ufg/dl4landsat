@@ -1,79 +1,40 @@
-# nextgenmap
+# Deep Learning for Landsat 
 
-Planet Data: https://www.lapig.iesa.ufg.br/lapig/nextgenmap-data/
+## Dependencies
+* *python 3*
+* *numpy*
+* *scipy*
+* *sklearn*
+* *gdal*
+* *tensorflow>=1.4*
+* *rasterio>=1.0a12*
+* *RIOS>=1.4.4 (only for normalization script)*
 
-## Proposed Estructure to Integrate GEE and Tensorflow
+## Input Data
+* Download link: https://www.lapig.iesa.ufg.br/lapig/nextgenmap-data/Landsat/
+* Scene ID: LC08_L1TP_223071_20160905_20170321_01_T1
+* Spectral data: Blue, Green, Red, NIR, SWIR1, SWIR2, Thermal, NDVI (8 bands)
+* Reference data: Pasturelands Map (value 1 for pasture pixels)
 
-### Minimal Requirements
-* Google Cloud Account
-* Create an Computer Engine Instance:
-    > 1 core
-    > 2gb RAM
-    > 30gb of Storage (hdd or ssd)
-    > CentOS 7 system installed
-    > 1 GPU Nvidia K80
+## Data Augmentation
 
-### Steps of cloud configuration:
-* Install Nvidia/CUDA driver
-* Install Docker
-* Install Nvidia-Docker
-* Deploy Portainer.io: Web-Based Docker Manager
-* Deploy TensorFlow: CPU
-* Install GEE library
-    > Deploy TensorFlow: GPU
-* Install GEE library
+![Data Augmentation](docs/imgs/data-augmentation.png)
 
+## Implemented models
 
+### U-net
 
-## Install  NVIDIA/CUDA Driver
-```sh
-$ sudo yum install wget
-$ sudo yum install cc gcc
-$ sudo yum install kernel-devel-$(uname -r) kernel-headers-$(uname -r)
-$ wget https://developer.nvidia.com/compute/cuda/9.1/Prod/local_installers/cuda_9.1.85_387.26_linux
-$ sudo sh cuda_9.1.85_387.26_linux  # dont install the nvidia-xconfig
-```
+![U-Net](docs/imgs/u-net.png)
 
-### CentOs install Docker
-```sh
-$ sudo yum install docker
-```
+Results: [Pasturelands Mapping](docs/presentations/pasturelands_mapping.pdf)
 
-### CentOs install Nvidia-Docker
-```sh
-$ curl -s -L https://nvidia.github.io/nvidia-docker/centos7/x86_64/nvidia-docker.repo | \ 
-  sudo tee /etc/yum.repos.d/nvidia-docker.repo
+## How works
 
-$ sudo yum install -y yum-utils \
-  device-mapper-persistent-data \
-  lvm2
+**Train**
+python3 run.py train LC08_L1TP_223071_20160905_20170321_01_T1.img 0
 
-$ sudo yum-config-manager \
-    --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
+**Evaluate**
+python3 run.py evaluate LC08_L1TP_223071_20160905_20170321_01_T1.img 0
 
-$ sudo yum install docker-ce        
-$ sudo yum install -y nvidia-docker2
-$ sudo pkill -SIGHUP dockerd
-```
-
-### Start Docker Again
-```sh
-$ sudo systemctl start docker
-```
-
-### Centos Deploing "portainer.io"
-``` sh
-$ docker volume create portainer_data
-$ docker run --runtime=nvidia -d -p 80:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
-# Now, the portainer will run, you can access throught putting you server address on browser url.
-# On main page you will click on 
-
-## Deploy TensorFlow:GPU
-
-# Dependencias
-$ pip install opencv-python
-$ apt update && apt install -y libsm6 libxext6
-$ apt install libxext6
-$ pip install tqdm
-```
+**Predict**
+python3 run.py predict LC08_L1TP_223071_20160905_20170321_01_T1.img 0
