@@ -26,7 +26,7 @@
 
 ![U-Net](docs/imgs/u-net.png)
 
-Results: [Pasturelands Mapping](docs/presentations/pasturelands_mapping.pdf)
+Results: [Pastureland Mapping](docs/presentations/pastureland_mapping.pdf)
 
 ## How works
 
