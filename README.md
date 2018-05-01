@@ -31,10 +31,10 @@ Results: [Pastureland Mapping](docs/presentations/pastureland_mapping.pdf)
 ## How works
 
 **Train**
-python3 run.py train LC08_L1TP_223071_20160905_20170321_01_T1.img 0
+python3 run.py train LC08_L1TP_223071_20160905_20170321_01_T1.img -2.0
 
 **Evaluate**
-python3 run.py evaluate LC08_L1TP_223071_20160905_20170321_01_T1.img 0
+python3 run.py evaluate LC08_L1TP_223071_20160905_20170321_01_T1.img -2.0
 
 **Predict**
-python3 run.py predict LC08_L1TP_223071_20160905_20170321_01_T1.img 0
+python3 run.py predict LC08_L1TP_223071_20160905_20170321_01_T1.img -2.0

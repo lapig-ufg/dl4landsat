@@ -26,9 +26,11 @@ def get_chips(path_image, size = 100, pad_x = 0, pad_y = 0, nodata_value = 0, re
 			window_aux = windows.Window(col_start, row_start, size, size)
 			data_aux = dataset.read(indexes, window=window_aux, masked=False, boundless=True)
 
-			if(not remove_chips_wnodata or np.min(data_aux) != nodata_value):
+			if(not remove_chips_wnodata or float(np.min(data_aux)) == float(nodata_value)):
 				data_result.append(data_aux)
 				windows_result.append(window_aux)
+			else:
+				print('nao inseriu')
 
 			if (row_start + size*2) > height or (col_start + size*2) > width:
 				break
@@ -66,22 +68,22 @@ def get_input_data(img_path, nodata_value, chip_size, seed):
 	
 	npz_path = os.path.splitext(img_path)[0] + '.npz'
 
-	padding_list = [(0,0), (0,50), (50, 0), (50,50)]
+	padding_list = [(0,0), (0,128), (128, 0), (128,128)]
 
 	if os.path.isfile(npz_path):
 		print("Reading from cache " + npz_path + "...")
 		data = np.load(npz_path)
-		input_data = data['input'].reshape(-1, chip_size, chip_size, 5)
+		input_data = data['input'].reshape(-1, chip_size, chip_size, 9)
 	else:
 		print("Reading image " + img_path + "...")
-		input_data, _ = get_chips_padding(img_path, size=chip_size, start_perc_positions=padding_list, rotate=False, flip=True, \
+		input_data, _ = get_chips_padding(img_path, size=chip_size, start_perc_positions=padding_list, rotate=True, flip=True, \
 															nodata_value=nodata_value, remove_chips_wnodata=True)
 		print(input_data.shape)
 		print("Saving in cache " + npz_path + "...")
 		np.savez_compressed(npz_path, input=input_data)
 
-	x_train = input_data[:,:,:,0:4]
-	y_train = input_data[:,:,:,4:5]
+	x_train = input_data[:,:,:,0:8]
+	y_train = input_data[:,:,:,8:9]
 
 	nsamples, _, _, channels = x_train.shape
 	img_size = chip_size

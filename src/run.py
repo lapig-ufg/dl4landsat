@@ -119,15 +119,15 @@ def print_usage():
 SEED = 1989
 CHIP_SIZE = 256
 BATCH_SIZE = 50
-MODEL_DIR = 'logs_planet'
-NUMBER_EPOCHS = 2
+MODEL_DIR = 'logs_unet'
+NUMBER_EPOCHS = 100
 
 if(len(sys.argv) != 4):
 	print_usage()
 
 mode = sys.argv[1]
 img_input_path = sys.argv[2]
-img_input_nodata = sys.argv[2]
+img_input_nodata = sys.argv[3]
 
 tf.set_random_seed(SEED)
 tf.logging.set_verbosity(tf.logging.INFO)
@@ -144,7 +144,6 @@ elif mode == 'predict':
 elif mode == 'train':
 	
 	train(img_input_path, img_input_nodata)
-
 else:
 	print('Invalid mode !')
 	print_usage()
