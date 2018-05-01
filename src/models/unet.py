@@ -76,7 +76,7 @@ def description(features, labels, mode, params, config):
 	up9 = upconv_concat(conv8, conv1, 32, flags, name=9)
 	conv9 = conv_conv_pool(up9, [32, 32], mode, flags, name=9, pool=False)
 
-	output = tf.layers.conv2d(conv9, 1, (1, 1), name='output', activation=tf.nn.relu, padding='same',
+	output = tf.layers.conv2d(conv9, 1, (1, 1), name='output', activation=tf.nn.sigmoid, padding='same',
 									kernel_initializer=tf.initializers.variance_scaling(scale=0.01, distribution="normal"))
 
 	if mode == tf.estimator.ModeKeys.PREDICT:
