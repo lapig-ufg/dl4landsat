@@ -26,11 +26,9 @@ def get_chips(path_image, size = 100, pad_x = 0, pad_y = 0, nodata_value = 0, re
 			window_aux = windows.Window(col_start, row_start, size, size)
 			data_aux = dataset.read(indexes, window=window_aux, masked=False, boundless=True)
 
-			if(not remove_chips_wnodata or float(np.min(data_aux)) == float(nodata_value)):
+			if(not remove_chips_wnodata or float(np.min(data_aux)) != float(nodata_value)):
 				data_result.append(data_aux)
 				windows_result.append(window_aux)
-			else:
-				print('nao inseriu')
 
 			if (row_start + size*2) > height or (col_start + size*2) > width:
 				break
